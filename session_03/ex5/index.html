@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Isolated App | /opt/my-app</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+            color: #f4f4f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: rgba(39, 39, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3.5rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+        }
+        h1 {
+            color: #38bdf8;
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        p {
+            color: #a1a1aa;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .path-badge {
+            display: inline-block;
+            background: #0284c7;
+            color: #ffffff;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Production Isolated Web Application</h1>
+        <p>Ứng dụng web và logs được cô lập bảo mật tại phân vùng hệ thống <code>/opt/</code>.</p>
+        <div class="path-badge">Root: /opt/my-app/html | Logs: /opt/my-app/logs</div>
+    </div>
+</body>
+</html>
