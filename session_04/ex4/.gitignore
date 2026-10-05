@@ -1,0 +1,7 @@
+# Bo qua file chua thong tin dang nhap nhay cam
+credentials.txt
+
+# Bo qua cac file log va tam thoi
+*.log
+__pycache__/
+.env
