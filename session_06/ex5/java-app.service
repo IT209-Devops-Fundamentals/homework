@@ -1,0 +1,13 @@
+[Unit]
+Description=Mocked Java Spring Boot Application Service
+After=network.target
+
+[Service]
+User=java-runner
+# Mô phỏng ứng dụng Java chạy nền bằng lệnh sleep
+ExecStart=/bin/sleep 3600
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
