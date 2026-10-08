@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Docs & Cheatsheet</title>
+    <style>
+        :root {
+            --bg-body: #090d16;
+            --bg-sidebar: #0f172a;
+            --border: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --code-bg: #1e293b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex; min-height: 100vh;
+        }
+        aside {
+            width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem; flex-shrink: 0;
+        }
+        .logo { font-size: 1.3rem; font-weight: 800; color: var(--accent); margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; }
+        .nav-group { margin-bottom: 1.5rem; }
+        .nav-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.75rem; letter-spacing: 0.05em; }
+        .nav-links a {
+            display: block; color: var(--text-muted); text-decoration: none; padding: 0.5rem 0.75rem;
+            border-radius: 8px; font-size: 0.95rem; margin-bottom: 0.25rem; transition: all 0.2s;
+        }
+        .nav-links a.active, .nav-links a:hover {
+            background: rgba(16, 185, 129, 0.1); color: var(--accent); font-weight: 600;
+        }
+        main { flex: 1; padding: 3rem 4rem; max-width: 900px; }
+        h1 { font-size: 2.25rem; margin-bottom: 0.75rem; }
+        p.desc { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; }
+        h2 { font-size: 1.5rem; margin: 2rem 0 1rem 0; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        .callout {
+            background: rgba(16, 185, 129, 0.08); border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem; border-radius: 0 10px 10px 0; margin-bottom: 1.5rem;
+            color: #d1fae5; font-size: 0.95rem;
+        }
+        pre {
+            background: var(--code-bg); padding: 1.25rem; border-radius: 12px;
+            overflow-x: auto; border: 1px solid var(--border); margin-bottom: 1.5rem;
+        }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #38bdf8; font-size: 0.9rem; }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            aside { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+            main { padding: 2rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <div class="logo">📖 DevOps Docs</div>
+        <div class="nav-group">
+            <div class="nav-label">Cẩm nang Nginx</div>
+            <div class="nav-links">
+                <a href="#quickstart" class="active">Khởi động nhanh</a>
+                <a href="#virtualhost">Cấu hình Virtual Host</a>
+                <a href="#troubleshoot">Gỡ lỗi 403 & 502</a>
+            </div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-label">Quản trị Linux</div>
+            <div class="nav-links">
+                <a href="#permissions">Phân quyền 755 & 644</a>
+                <a href="#ufw">Tường lửa UFW</a>
+            </div>
+        </div>
+    </aside>
+
+    <main>
+        <h1>DevOps Knowledge Base</h1>
+        <p class="desc">Tài liệu tra cứu nhanh các câu lệnh và cấu hình quản trị hệ thống Linux & Web Server.</p>
+
+        <div class="callout">
+            <strong>Mẹo vàng:</strong> Trước khi reload Nginx trong môi trường Production, luôn chạy lệnh <code>sudo nginx -t</code> để đảm bảo không bị lỗi cú pháp làm sập server!
+        </div>
+
+        <h2 id="virtualhost">1. Lệnh Nạp Cấu Hình Nginx</h2>
+        <pre><code># Kiểm tra lỗi cú pháp cấu hình
+sudo nginx -t
+
+# Nạp lại cấu hình không gián đoạn kết nối
+sudo systemctl reload nginx
+
+# Khởi động lại dịch vụ khi cần
+sudo systemctl restart nginx</code></pre>
+
+        <h2 id="permissions">2. Chuẩn Phân Quyền Thư Mục Web (/var/www)</h2>
+        <pre><code># Gán sở hữu cho devops và nhóm Nginx
+sudo chown -R devops:www-data /var/www/my-site
+
+# Thư mục: 755 (đọc + duyệt thư mục)
+sudo find /var/www/my-site -type d -exec chmod 755 {} +
+
+# Tệp tin: 644 (chỉ đọc)
+sudo find /var/www/my-site -type f -exec chmod 644 {} +</code></pre>
+
+        <h2 id="ufw">3. Mở Cổng Tường Lửa UFW</h2>
+        <pre><code># Mở cổng HTTP & các cổng phụ
+sudo ufw allow 80/tcp
+sudo ufw allow 8081/tcp
+sudo ufw allow 8082/tcp
+sudo ufw status verbose</code></pre>
+    </main>
+</body>
+</html>

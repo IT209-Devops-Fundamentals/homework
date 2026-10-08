@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudMetrics | Nền Tảng Giám Sát Cloud 24/7</title>
+    <style>
+        :root {
+            --bg: #09090b;
+            --card-bg: #18181b;
+            --border: #27272a;
+            --text-main: #fafafa;
+            --text-muted: #a1a1aa;
+            --primary: #a855f7;
+            --primary-gradient: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg); color: var(--text-main); line-height: 1.6;
+        }
+        .container { max-width: 1050px; margin: 0 auto; padding: 2rem 1.5rem; }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; margin-bottom: 4rem; }
+        .logo { font-size: 1.4rem; font-weight: 800; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.1); color: #fff; padding: 0.5rem 1.25rem;
+            border-radius: 9999px; text-decoration: none; font-size: 0.9rem; font-weight: 600;
+        }
+        .hero { text-align: center; max-width: 780px; margin: 0 auto 5rem auto; }
+        .hero-badge {
+            display: inline-block; background: rgba(168, 85, 247, 0.15); color: #c084fc;
+            padding: 0.4rem 1rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+        .hero h1 {
+            font-size: 3rem; line-height: 1.15; font-weight: 900; margin-bottom: 1.25rem;
+            background: linear-gradient(180deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { font-size: 1.15rem; color: var(--text-muted); margin-bottom: 2rem; }
+        .btn-primary {
+            display: inline-block; background: var(--primary-gradient); color: #fff; font-weight: 700;
+            padding: 0.85rem 2.25rem; border-radius: 9999px; text-decoration: none; font-size: 1.05rem;
+            box-shadow: 0 10px 25px rgba(168, 85, 247, 0.4);
+        }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 5rem; }
+        .feature-card {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px;
+            padding: 2rem; text-align: left;
+        }
+        .icon { font-size: 2rem; margin-bottom: 1rem; }
+        .feature-card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+        .feature-card p { font-size: 0.95rem; color: var(--text-muted); }
+        .pricing-section { text-align: center; margin-bottom: 4rem; }
+        .pricing-card {
+            background: var(--card-bg); border: 2px solid var(--primary); border-radius: 24px;
+            padding: 3rem; max-width: 420px; margin: 2rem auto;
+            box-shadow: 0 20px 40px rgba(168, 85, 247, 0.15);
+        }
+        .price { font-size: 3rem; font-weight: 900; margin: 1rem 0; color: #fff; }
+        .price span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
+        footer { text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 2rem 0; border-top: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="logo">⚡ CloudMetrics</div>
+            <a href="#pricing" class="btn-nav">Đăng Ký Thử Nghiệm</a>
+        </nav>
+
+        <section class="hero">
+            <span class="hero-badge">🚀 Ra Mắt Phiên Bản 2.0</span>
+            <h1>Giám Sát Hạ Tầng Đám Mây Theo Thời Gian Thực</h1>
+            <p>Phân tích hiệu năng VPS, phát hiện nghẽn mạng và tự động cảnh báo khi CPU/RAM chạm ngưỡng nguy hiểm.</p>
+            <a href="#pricing" class="btn-primary">Bắt Đầu Miễn Phí 14 Ngày</a>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <div class="icon">📊</div>
+                <h3>Real-time Metrics</h3>
+                <p>Theo dõi băng thông mạng, IOPS ổ cứng SSD và tiến trình Nginx theo từng giây.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔔</div>
+                <h3>Cảnh Báo Tức Thì</h3>
+                <p>Gửi thông báo qua Telegram, Slack hoặc Email ngay khi phát hiện dịch vụ bị sập.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🛡️</div>
+                <h3>Phát Hiện Bất Thường</h3>
+                <p>Trí tuệ nhân tạo nhận diện tấn công từ chối dịch vụ DDoS và dò quét cổng bất thường.</p>
+            </div>
+        </section>
+
+        <section class="pricing-section" id="pricing">
+            <h2>Gói Cước Tối Ưu Cho DevOps</h2>
+            <div class="pricing-card">
+                <h3>Pro Developer</h3>
+                <div class="price">$9 <span>/tháng</span></div>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Dành cho cá nhân và nhóm kỹ sư quản lý tối đa 5 máy chủ Cloud VPS.</p>
+                <a href="#" class="btn-primary" style="display: block;">Kích Hoạt Tài Khoản</a>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2026 CloudMetrics Inc. — Deployed alongside other apps on Single Ubuntu VPS</p>
+        </footer>
+    </div>
+</body>
+</html>
