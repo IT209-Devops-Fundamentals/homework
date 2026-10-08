@@ -384,7 +384,162 @@ Khi đi thi, một đề thi thường có nhiều câu (Câu 1: Web tĩnh cổn
 
 ---
 
-## 5. CHECKLIST 5 PHÚT CUỐI GIỜ TRƯỚC KHI TẮT MÁY ĐI VỀ
+## 5. CHUYÊN ĐỀ 3: TRIỂN KHAI HỆ THỐNG FULLSTACK (FRONTEND HTML + BACKEND SPRING BOOT + MYSQL)
+
+Đây là dạng bài thi tổng hợp đỉnh cao trong DevOps: Kết hợp cả Web tĩnh (Frontend), Web động (Backend REST API) và Cơ sở dữ liệu (MySQL) trên cùng 1 máy chủ VPS.
+
+### 5.1. Mô hình Kiến trúc Tích hợp qua Nginx (All-in-One Reverse Proxy)
+
+```mermaid
+flowchart TD
+    Client["Trình duyệt Người dùng (Port 80)"] --> Nginx["NGINX GATEWAY (Port 80)"]
+    Nginx -->|Truy cập / (File tĩnh HTML)| WebRoot["/var/www/frontend/index.html\n(Giao diện người dùng)"]
+    Nginx -->|Gọi /api/... (Chuyển tiếp Reverse Proxy)| SpringBoot["Spring Boot Service (Port 8082)\n(/opt/.../app.jar)"]
+    SpringBoot -->|Kết nối JDBC Port 3306| MySQL[("MySQL Database Server\n(medicare_patient_db)")]
+```
+
+> **Lợi ích vàng của mô hình này:**
+> 1. **Triệt tiêu 100% lỗi CORS:** Vì cả Frontend và API đều chung địa chỉ `http://<IP_VPS>`, trình duyệt không bao giờ chặn request.
+> 2. **Chuyên nghiệp:** Giáo viên chỉ cần vào đúng 1 link duy nhất trên cổng 80 là xem được cả giao diện HTML bấm nút gọi API và hiển thị dữ liệu từ MySQL.
+
+---
+
+### 5.2. Quy trình 5 Giai đoạn Triển khai Fullstack
+
+#### GIAI ĐOẠN 1: Chuẩn bị Cơ sở dữ liệu MySQL (Database Tier)
+*(Thực hiện trên VPS)*
+```bash
+sudo apt update && sudo apt install -y mysql-server
+sudo mysql
+```
+Trong `mysql>`:
+```sql
+CREATE DATABASE IF NOT EXISTS medicare_patient_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '002203Huylam!';
+GRANT ALL PRIVILEGES ON medicare_patient_db.* TO 'root'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+---
+
+#### GIAI ĐOẠN 2: Triển khai Backend Spring Boot chạy ngầm (App Tier)
+*(Thực hiện trên Local & VPS)*
+
+1. **Tại máy cá nhân (PowerShell):** Build JAR và đẩy lên VPS:
+   ```powershell
+   .\gradlew.bat bootJar -x test
+   scp build/libs/*.jar vps:~/app.jar
+   ```
+
+2. **Tại VPS:** Chuyển vào `/opt/` và tạo Systemd Service:
+   ```bash
+   sudo mkdir -p /opt/my-backend
+   sudo mv ~/app.jar /opt/my-backend/app.jar
+   sudo chown -R devops:devops /opt/my-backend
+
+   sudo nano /etc/systemd/system/backend.service
+   ```
+   *Nội dung service:*
+   ```ini
+   [Unit]
+   Description=Fullstack Backend Spring Boot
+   After=network.target mysql.service
+
+   [Service]
+   User=devops
+   WorkingDirectory=/opt/my-backend
+   ExecStart=/usr/bin/java -Xms128m -Xmx384m -jar /opt/my-backend/app.jar
+   Restart=always
+   RestartSec=10
+   StandardOutput=journal
+   StandardError=journal
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+   *Khởi động:*
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now backend
+   ```
+
+---
+
+#### GIAI ĐOẠN 3: Triển khai Frontend HTML (Web Tier)
+*(Thực hiện trên Local & VPS)*
+
+1. **Tại máy cá nhân (PowerShell):** Đẩy thư mục HTML lên VPS:
+   ```powershell
+   scp -r frontend vps:~
+   ```
+
+2. **Tại VPS:** Bố trí thư mục web và phân quyền:
+   ```bash
+   sudo mkdir -p /var/www/frontend
+   sudo cp -r ~/frontend/* /var/www/frontend/
+   sudo chown -R $USER:www-data /var/www/frontend
+   sudo chmod -R 755 /var/www/frontend
+   ```
+
+---
+
+#### GIAI ĐOẠN 4: Cấu hình Nginx All-In-One (Trái tim của hệ thống)
+*(Thực hiện trên VPS)*
+
+Mở file cấu hình Nginx:
+```bash
+sudo nano /etc/nginx/sites-available/fullstack.conf
+```
+
+Dán cấu hình tích hợp 2 trong 1:
+```nginx
+server {
+    listen 80;
+    server_name _;
+
+    # 1. PHỤC VỤ GIAO DIỆN FRONTEND HTML
+    root /var/www/frontend;
+    index index.html index.htm;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 2. CHUYỂN TIẾP MỌI REQUEST API VÀO SPRING BOOT (PORT 8082)
+    location /api/ {
+        proxy_pass http://127.0.0.1:8082;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+*(Lưu: `Ctrl + O` -> `Enter`, Thoát: `Ctrl + X`)*.
+
+Kích hoạt Nginx:
+```bash
+sudo ln -s /etc/nginx/sites-available/fullstack.conf /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+---
+
+#### GIAI ĐOẠN 5: Mở Firewall & Nghiệm thu
+```bash
+# Mở cổng 80 trên tường lửa
+sudo ufw allow 80/tcp
+
+# Nghiệm thu:
+# 1. Truy cập giao diện: http://103.72.57.112/
+# 2. Kiểm tra API trực tiếp qua Nginx: http://103.72.57.112/api/v1/medicals
+```
+
+---
+
+## 6. CHECKLIST 5 PHÚT CUỐI GIỜ TRƯỚC KHI TẮT MÁY ĐI VỀ
 
 Trước khi nộp bài và rời khỏi phòng thi, hãy thực hiện bài test **"3 Bước An Tâm Tuyệt Đối"**:
 
@@ -392,7 +547,7 @@ Trước khi nộp bài và rời khỏi phòng thi, hãy thực hiện bài tes
    ```bash
    sudo systemctl is-active nginx
    sudo systemctl is-active mysql
-   sudo systemctl is-active medicare-service
+   sudo systemctl is-active backend
    ```
    *(Cả 3 dịch vụ đều phải trả về `active`)*.
 
@@ -400,10 +555,11 @@ Trước khi nộp bài và rời khỏi phòng thi, hãy thực hiện bài tes
    ```bash
    sudo ufw status
    ```
-   *(Đảm bảo các cổng cần thiết như `2222`, `8081`, `8082` đều ở trạng thái `ALLOW`)*.
+   *(Đảm bảo các cổng cần thiết như `2222`, `80` đều ở trạng thái `ALLOW`)*.
 
 3. **Bước 3: Bài test 4G Điện thoại cá nhân 📱**
    - Tắt Wifi trên điện thoại, bật mạng 4G/5G.
    - Nhập trực tiếp địa chỉ IP Public của VPS vào trình duyệt điện thoại:
-     `http://103.72.57.112:8082/api/v1/medicals`
-   - Nếu dữ liệu hiển thị mượt mà trên điện thoại -> **100% Chắc chắn hệ thống đã độc lập hoàn toàn với máy tính**. Bạn có thể tắt máy, đóng nắp laptop và tự tin nộp bài ra về!
+     `http://103.72.57.112/`
+   - Nếu giao diện HTML hiển thị và dữ liệu bệnh án/sản phẩm tải mượt mà -> **100% Chắc chắn hệ thống đã độc lập hoàn toàn với máy tính**. Bạn có thể tắt máy, đóng nắp laptop và tự tin nộp bài ra về!
+
