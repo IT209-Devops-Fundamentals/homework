@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevOps Master Quiz - Ôn Tập Trắc Nghiệm Git & Ubuntu Linux</title>
+  <meta name="description" content="Nền tảng ôn tập trắc nghiệm DevOps toàn diện với 68 câu hỏi chuyên sâu về Git, GitHub và Ubuntu Linux Server. Hỗ trợ luyện tập, thi thử bấm giờ, flashcards và deploy GitHub Pages.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+</head>
+<body class="dark-theme">
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-logo">
+          <span class="logo-icon">⚡</span>
+          <div>
+            <h1 class="brand-title">DevOps Master Quiz</h1>
+            <span class="brand-subtitle">Git & GitHub • Ubuntu Linux Server</span>
+          </div>
+        </div>
+        <div class="badge-pill">
+          <span class="pulse-dot"></span>
+          <span>68 Câu Hỏi Chuyên Sâu</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Quick search -->
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Tìm kiếm lệnh, khái niệm..." autocomplete="off">
+          <button id="clear-search-btn" class="icon-btn-sm" title="Xóa tìm kiếm" style="display: none;">✕</button>
+        </div>
+
+        <!-- Audio toggle -->
+        <button id="sound-toggle-btn" class="action-btn" title="Bật/Tắt âm thanh tương tác">
+          <span id="sound-icon">🔊</span>
+        </button>
+
+        <!-- Theme toggle -->
+        <button id="theme-toggle-btn" class="action-btn" title="Đổi giao diện Sáng / Tối">
+          <span id="theme-icon">🌙</span>
+        </button>
+
+        <!-- GitHub Deploy Guide -->
+        <button id="deploy-guide-btn" class="action-btn btn-highlight" title="Hướng dẫn Deploy lên GitHub Pages">
+          <span class="btn-icon">🚀</span>
+          <span class="btn-text">Deploy GitHub</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Global Progress Bar -->
+    <div class="global-stats-card">
+      <div class="stat-item">
+        <span class="stat-label">Tổng câu hỏi</span>
+        <span class="stat-val" id="total-questions-stat">68</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-label">Đã hoàn thành</span>
+        <span class="stat-val stat-primary" id="completed-stat">0/68</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-label">Tỉ lệ đúng</span>
+        <span class="stat-val stat-success" id="accuracy-stat">0%</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-label">Chuỗi đúng (Streak)</span>
+        <span class="stat-val stat-warning" id="streak-stat">🔥 0</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-label">Đã ghim</span>
+        <span class="stat-val stat-accent" id="bookmark-count-stat">⭐ 0</span>
+      </div>
+      <div class="stat-actions">
+        <button id="reset-progress-btn" class="btn-ghost-sm" title="Làm mới lại toàn bộ kết quả đã lưu">
+          🔄 Đặt lại tiến độ
+        </button>
+      </div>
+    </div>
+
+    <!-- Mode Selector Tabs -->
+    <nav class="mode-navigation">
+      <button class="mode-tab active" data-mode="practice">
+        <span class="tab-icon">📝</span>
+        <span>Luyện Tập Tự Do</span>
+      </button>
+      <button class="mode-tab" data-mode="exam">
+        <span class="tab-icon">⏱️</span>
+        <span>Thi Thử Mô Phỏng</span>
+      </button>
+      <button class="mode-tab" data-mode="flashcard">
+        <span class="tab-icon">🗂️</span>
+        <span>Thẻ Ghi Nhớ (Flashcard)</span>
+      </button>
+      <button class="mode-tab" data-mode="bookmarks">
+        <span class="tab-icon">⭐</span>
+        <span>Câu Đã Ghim (<span id="bookmark-badge-num">0</span>)</span>
+      </button>
+      <button class="mode-tab" data-mode="mistakes">
+        <span class="tab-icon">❌</span>
+        <span>Ôn Câu Làm Sai (<span id="mistakes-badge-num">0</span>)</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-layout">
+      <!-- Sidebar / Filters (Active in Practice, Bookmarks, Mistakes) -->
+      <aside class="sidebar-filters" id="sidebar-filters">
+        <div class="filter-group">
+          <div class="filter-header">
+            <h3>Chuyên Đề Ôn Tập</h3>
+            <span class="filter-badge" id="filtered-count">68 câu</span>
+          </div>
+
+          <div class="category-buttons">
+            <button class="cat-pill active" data-category="all">
+              <span class="cat-dot dot-all"></span>
+              <span>Tất Cả Câu Hỏi (68)</span>
+            </button>
+
+            <!-- Phần 1: Git -->
+            <div class="cat-section-title">
+              <span>PHẦN 1: GIT & GITHUB (33)</span>
+            </div>
+            <button class="cat-pill" data-category="git-all">
+              <span class="cat-dot dot-git"></span>
+              <span>Toàn bộ Git & GitHub</span>
+            </button>
+            <button class="cat-pill sub-pill" data-category="Git Cơ bản">
+              <span>▫️ 1.1 Cơ bản & Kiến trúc</span>
+            </button>
+            <button class="cat-pill sub-pill" data-category="Nhánh & Conflict">
+              <span>▫️ 1.2 Nhánh & Xung đột</span>
+            </button>
+            <button class="cat-pill sub-pill" data-category="Remote & PR">
+              <span>▫️ 1.3 Remote & Pull Request</span>
+            </button>
+            <button class="cat-pill sub-pill" data-category="Git Nâng cao">
+              <span>▫️ 1.4 Kỹ thuật Nâng cao</span>
+            </button>
+
+            <!-- Phần 2: Linux -->
+            <div class="cat-section-title">
+              <span>PHẦN 2: UBUNTU LINUX (35)</span>
+            </div>
+            <button class="cat-pill" data-category="linux-all">
+              <span class="cat-dot dot-linux"></span>
+              <span>Toàn bộ Ubuntu Server</span>
+            </button>
+            <button class="cat-pill sub-pill" data-category="Linux CLI & Kiến trúc">
+              <span>▫️ 2.1 Kiến trúc & CLI</span>
+            </button>
+            <button class="cat-pill sub-pill" data-category="Linux User & Group">
+              <span>▫️ 2.2 Quản lý User & Group</span>
+            </button>
+            <button class="cat-pill sub-pill" data-category="Linux Network">
+              <span>▫️ 2.3 Quản lý Network</span>
+            </button>
+            <button class="cat-pill sub-pill" data-category="Linux Process & Systemd">
+              <span>▫️ 2.4 Process & Systemd</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Keyboard Tips -->
+        <div class="shortcut-tip-box">
+          <div class="tip-title">⚡ Phím tắt nhanh:</div>
+          <div class="shortcut-row">
+            <span class="key-tag">A</span> <span class="key-tag">B</span> <span class="key-tag">C</span> <span class="key-tag">D</span>
+            <span class="key-desc">Chọn đáp án</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="key-tag">←</span> <span class="key-tag">→</span>
+            <span class="key-desc">Câu trước / sau</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="key-tag">Space</span>
+            <span class="key-desc">Lật thẻ Flashcard</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center Dynamic Viewport -->
+      <section class="content-viewport" id="content-viewport">
+        <!-- VIEW 1: PRACTICE MODE -->
+        <div id="practice-view" class="view-panel active">
+          <!-- Top Question Bar -->
+          <div class="question-meta-bar">
+            <div class="meta-left">
+              <span class="topic-tag" id="current-topic-tag">Git Cơ bản</span>
+              <span class="question-counter" id="question-index-indicator">Câu 1 / 68</span>
+            </div>
+            <div class="meta-right">
+              <button id="bookmark-btn" class="icon-toggle-btn" title="Ghim câu này để xem lại sau">
+                <span class="bookmark-icon">☆</span>
+                <span class="btn-label">Ghim câu hỏi</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Progress Bar inside Practice -->
+          <div class="mini-progress-track">
+            <div class="mini-progress-fill" id="question-progress-bar" style="width: 1.5%;"></div>
+          </div>
+
+          <!-- Question Body Card -->
+          <div class="quiz-card" id="quiz-question-card">
+            <div class="question-text-box">
+              <h2 class="question-title" id="question-title-text">
+                Đang tải dữ liệu câu hỏi...
+              </h2>
+            </div>
+
+            <!-- Options Grid -->
+            <div class="options-container" id="options-container">
+              <!-- Dynamically rendered -->
+            </div>
+
+            <!-- Explanation Box (Appears after answer) -->
+            <div class="explanation-box" id="explanation-box" style="display: none;">
+              <div class="explanation-header">
+                <span class="exp-icon">💡</span>
+                <strong>Giải thích chi tiết & DevOps Best Practice:</strong>
+              </div>
+              <div class="explanation-content" id="explanation-text"></div>
+            </div>
+
+            <!-- Bottom Navigation Bar -->
+            <div class="quiz-nav-footer">
+              <button id="prev-question-btn" class="nav-btn btn-secondary">
+                ← Câu trước
+              </button>
+              
+              <div class="quick-jump-container">
+                <label for="jump-select">Nhảy đến câu:</label>
+                <select id="jump-select" class="select-dropdown">
+                  <!-- Generated options -->
+                </select>
+              </div>
+
+              <button id="next-question-btn" class="nav-btn btn-primary">
+                Câu tiếp theo →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: EXAM MODE -->
+        <div id="exam-view" class="view-panel">
+          <!-- Exam Setup Screen (When not started) -->
+          <div id="exam-setup-box" class="exam-card">
+            <div class="exam-header-splash">
+              <div class="exam-badge-icon">⏱️</div>
+              <h2>Phòng Thi Thử Mô Phỏng DevOps</h2>
+              <p>Thử thách bản thân dưới áp lực thời gian với các bộ đề trắc nghiệm ngẫu nhiên, không hiện giải thích ngay.</p>
+            </div>
+
+            <div class="exam-config-grid">
+              <div class="config-card active" data-exam-type="quick" data-count="20" data-time="15">
+                <div class="config-icon">⚡</div>
+                <h3>Khảo Sát Nhanh</h3>
+                <div class="config-metric">20 Câu hỏi • 15 Phút</div>
+                <p>Thử thách tốc độ kiểm tra các kiến thức cốt lõi nhất.</p>
+              </div>
+
+              <div class="config-card" data-exam-type="standard" data-count="40" data-time="30">
+                <div class="config-icon">🎯</div>
+                <h3>Tiêu Chuẩn Đề Thi</h3>
+                <div class="config-metric">40 Câu hỏi • 30 Phút</div>
+                <p>Độ dài chuẩn tương đương bài kiểm tra chính thức trên lớp.</p>
+              </div>
+
+              <div class="config-card" data-exam-type="full" data-count="60" data-time="45">
+                <div class="config-icon">🏆</div>
+                <h3>Toàn Diện 60 Câu</h3>
+                <div class="config-metric">60 Câu hỏi • 45 Phút</div>
+                <p>Bao quát toàn bộ chương trình học Git & Ubuntu Server.</p>
+              </div>
+            </div>
+
+            <div class="exam-rules-list">
+              <h4>📋 Quy chế phòng thi mô phỏng:</h4>
+              <ul>
+                <li>Thời gian bắt đầu đếm ngược ngay khi bấm "Bắt đầu làm bài".</li>
+                <li>Không hiển thị đáp án đúng/sai trong quá trình thi.</li>
+                <li>Bạn có thể nhảy câu hỏi bất kỳ và đổi lại đáp án trước khi bấm Nộp bài.</li>
+                <li>Hệ thống tự động chấm điểm và phân tích radar kiến thức ngay khi nộp bài hoặc hết giờ.</li>
+              </ul>
+            </div>
+
+            <button id="start-exam-btn" class="btn-start-exam">
+              🚀 Bắt Đầu Làm Bài Thi Ngay
+            </button>
+          </div>
+
+          <!-- Exam Active Playing Screen -->
+          <div id="exam-playing-box" class="exam-playing-container" style="display: none;">
+            <!-- Top Exam Bar with Countdown -->
+            <div class="exam-active-bar">
+              <div class="exam-timer-display" id="exam-timer-display">
+                <span class="timer-icon">⏳</span>
+                <span id="exam-timer-digits">15:00</span>
+              </div>
+              
+              <div class="exam-progress-info">
+                <span id="exam-answered-counter">Đã trả lời: 0/20 câu</span>
+              </div>
+
+              <button id="submit-exam-btn" class="btn-submit-exam">
+                📤 Nộp Bài Thi
+              </button>
+            </div>
+
+            <div class="exam-layout-split">
+              <!-- Left: Current Exam Question -->
+              <div class="exam-question-column">
+                <div class="quiz-card" id="exam-current-card">
+                  <div class="question-meta-bar">
+                    <span class="topic-tag" id="exam-q-topic">Git Cơ bản</span>
+                    <span class="question-counter" id="exam-q-number">Câu 1 / 20</span>
+                  </div>
+
+                  <div class="question-text-box">
+                    <h2 class="question-title" id="exam-q-title">Tiêu đề câu hỏi...</h2>
+                  </div>
+
+                  <div class="options-container" id="exam-options-container">
+                    <!-- Dynamic exam options -->
+                  </div>
+
+                  <div class="quiz-nav-footer">
+                    <button id="exam-prev-btn" class="nav-btn btn-secondary">← Câu trước</button>
+                    <button id="exam-flag-btn" class="nav-btn btn-warning-soft">🚩 Đặt cờ xem lại</button>
+                    <button id="exam-next-btn" class="nav-btn btn-primary">Câu tiếp theo →</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Question Palette / Jump Grid -->
+              <div class="exam-palette-column">
+                <div class="palette-card">
+                  <div class="palette-header">
+                    <h4>Bảng Điều Hướng</h4>
+                    <span class="palette-legend">
+                      <span class="legend-item"><span class="legend-dot unans"></span> Chưa làm</span>
+                      <span class="legend-item"><span class="legend-dot ans"></span> Đã chọn</span>
+                      <span class="legend-item"><span class="legend-dot flagged"></span> Cờ</span>
+                    </span>
+                  </div>
+                  <div class="palette-grid" id="exam-palette-grid">
+                    <!-- Numbers 1, 2, 3... -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exam Result Report Screen -->
+          <div id="exam-result-box" class="exam-result-container" style="display: none;">
+            <div class="result-hero-card">
+              <div class="result-score-circle" id="result-score-circle">
+                <span class="score-percent" id="result-percent-text">85%</span>
+                <span class="score-fraction" id="result-fraction-text">17/20 Đúng</span>
+              </div>
+              <div class="result-feedback">
+                <h2 id="result-verdict-title">Xuất Sắc!</h2>
+                <p id="result-verdict-desc">Bạn nắm rất vững kiến thức DevOps và quản trị hệ thống Linux.</p>
+                <div class="result-tags-row">
+                  <span class="badge-time" id="result-time-spent">⏱️ Thời gian: 08:32</span>
+                  <span class="badge-topic" id="result-highest-topic">🔥 Thế mạnh: Git & GitHub</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Breakdown by Category -->
+            <div class="result-breakdown-card">
+              <h3>Phân Tích Chi Tiết Theo Chuyên Đề</h3>
+              <div class="topic-bars-container" id="result-topic-breakdown">
+                <!-- Progress bars per category -->
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="result-actions-row">
+              <button id="review-exam-mistakes-btn" class="btn-primary">
+                ❌ Xem Lại Các Câu Làm Sai
+              </button>
+              <button id="retake-exam-btn" class="btn-secondary">
+                🔄 Làm Đề Thi Khác
+              </button>
+              <button id="back-to-practice-btn" class="btn-ghost">
+                📝 Trở Về Luyện Tập
+              </button>
+            </div>
+
+            <!-- Review questions list with answers -->
+            <div class="exam-review-section" id="exam-review-section" style="display: none;">
+              <h3>Chi Tiết Từng Câu Hỏi Trong Đề</h3>
+              <div class="review-questions-list" id="exam-review-questions-list">
+                <!-- Rendered question details with correct/wrong indications -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 3: FLASHCARD MODE -->
+        <div id="flashcard-view" class="view-panel">
+          <div class="flashcard-container">
+            <div class="flashcard-controls-top">
+              <div class="flashcard-progress-text" id="flashcard-counter">Thẻ 1 / 68</div>
+              <div class="flashcard-actions-right">
+                <button id="shuffle-flashcards-btn" class="btn-ghost-sm" title="Trộn ngẫu nhiên thứ tự thẻ">
+                  🔀 Trộn thẻ
+                </button>
+              </div>
+            </div>
+
+            <!-- 3D Flipping Card -->
+            <div class="card-scene">
+              <div class="flashcard-3d" id="flashcard-element">
+                <!-- Card Front -->
+                <div class="flashcard-face flashcard-front">
+                  <div class="card-tag" id="fc-front-topic">Git Cơ bản</div>
+                  <div class="card-hint">Bấm vào thẻ hoặc nhấn Space để lật đáp án</div>
+                  <div class="card-body-text" id="fc-front-question">
+                    Nội dung câu hỏi ghi nhớ...
+                  </div>
+                  <div class="card-footer-tip">
+                    <span>💡 Chạm để xem đáp án đúng & ghi chú DevOps</span>
+                  </div>
+                </div>
+
+                <!-- Card Back -->
+                <div class="flashcard-face flashcard-back">
+                  <div class="card-tag tag-success" id="fc-back-topic">Đáp Án & Ghi Chú</div>
+                  <div class="card-answer-highlight" id="fc-back-answer">
+                    Đáp án chính xác
+                  </div>
+                  <div class="card-explanation" id="fc-back-explanation">
+                    Giải thích chi tiết...
+                  </div>
+                  <div class="card-footer-tip">
+                    <span>Chạm để lật lại câu hỏi</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Flashcard Bottom Nav -->
+            <div class="flashcard-bottom-nav">
+              <button id="fc-prev-btn" class="nav-btn btn-secondary">
+                ← Thẻ Trước
+              </button>
+              <button id="fc-flip-btn" class="nav-btn btn-primary">
+                🔄 Lật Thẻ (Space)
+              </button>
+              <button id="fc-next-btn" class="nav-btn btn-primary">
+                Thẻ Tiếp Theo →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 4: BOOKMARKS / GHIM -->
+        <div id="bookmarks-view" class="view-panel">
+          <div class="special-list-header">
+            <h2>⭐ Danh Sách Câu Hỏi Đã Ghim</h2>
+            <p>Những câu hỏi quan trọng bạn đã lưu lại để ôn kỹ trước giờ thi.</p>
+          </div>
+          <div class="custom-questions-list" id="bookmarks-list-container">
+            <!-- Rendered bookmarks -->
+          </div>
+        </div>
+
+        <!-- VIEW 5: REVIEW MISTAKES / CÂU SAI -->
+        <div id="mistakes-view" class="view-panel">
+          <div class="special-list-header">
+            <h2>❌ Danh Sách Câu Làm Sai Cần Khắc Phục</h2>
+            <p>Tự động ghi nhận từ quá trình Luyện Tập và Thi Thử để bạn làm lại cho tới khi nhuần nhuyễn.</p>
+          </div>
+          <div class="custom-questions-list" id="mistakes-list-container">
+            <!-- Rendered mistakes -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Deploy GitHub Guide Modal -->
+  <div class="modal-backdrop" id="deploy-modal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">🚀</span>
+          <h3>Hướng Dẫn Đưa Lên GitHub Pages (Miễn Phí 100%)</h3>
+        </div>
+        <button id="close-deploy-modal" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro">
+          Trang web được thiết kế dạng <strong>Pure Vanilla Web (HTML5/CSS3/JS)</strong> độc lập hoàn toàn, không cần build phức tạp, có thể chạy trực tiếp trên bất kỳ trình duyệt nào và kích hoạt <strong>GitHub Pages</strong> chỉ trong 2 phút!
+        </p>
+
+        <div class="deploy-steps">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-info">
+              <h4>Đẩy mã nguồn thư mục `Quiz_Devops` lên GitHub</h4>
+              <p>Mở terminal tại thư mục này và gõ các lệnh Git:</p>
+              <div class="code-copy-block">
+                <code>git add .<br>git commit -m "feat: Add interactive DevOps 68 questions quiz app"<br>git push origin main</code>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-info">
+              <h4>Bật GitHub Pages trong mục Settings</h4>
+              <p>Truy cập vào Repository của bạn trên GitHub:</p>
+              <ol>
+                <li>Vào tab <strong>Settings</strong> ⚙️</li>
+                <li>Chọn mục <strong>Pages</strong> ở thanh menu bên trái</li>
+                <li>Tại mục <strong>Build and deployment &gt; Source</strong>, chọn: <code>Deploy from a branch</code></li>
+                <li>Tại <strong>Branch</strong>, chọn nhánh <code>main</code> và chọn thư mục <code>/ (root)</code> hoặc <code>/docs</code></li>
+                <li>Bấm <strong>Save</strong></li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-info">
+              <h4>Nhận link chia sẻ cho cả lớp cùng ôn tập!</h4>
+              <p>Sau 1-2 phút, GitHub sẽ cấp link dạng:</p>
+              <div class="code-copy-block">
+                <code>https://&lt;username&gt;.github.io/&lt;repo-name&gt;/Quiz_Devops/</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="copy-deploy-guide-btn" class="btn-primary">
+          📋 Sao Chép Hướng Dẫn
+        </button>
+        <button id="close-deploy-modal-btn" class="btn-secondary">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
