@@ -49,10 +49,10 @@ Host vps
 ### 2.1. Sơ đồ kiến trúc Nginx
 ```mermaid
 flowchart TD
-    Client["Client Browser"] -->|Port 8081 / 8082 / 8083| Nginx["Nginx Web Server"]
-    Nginx -->|DocRoot: /var/www/portfolio| Site1["Site 1: Portfolio"]
-    Nginx -->|DocRoot: /var/www/docs| Site2["Site 2: Docs"]
-    Nginx -->|DocRoot: /var/www/saas| Site3["Site 3: SaaS Landing"]
+    Client["Client Browser"] --> Nginx["Nginx Web Server"]
+    Nginx -->|Port 8081| Site1["Site 1: /var/www/portfolio"]
+    Nginx -->|Port 8082| Site2["Site 2: /var/www/docs"]
+    Nginx -->|Port 8083| Site3["Site 3: /var/www/saas"]
 ```
 
 ### 2.2. Bảng lệnh tóm tắt (Quy trình 6 bước chuẩn)
@@ -176,8 +176,8 @@ curl -I http://localhost:8083
 ### 3.1. Sơ đồ kiến trúc 3 Lớp (3-Tier)
 ```mermaid
 flowchart LR
-    Client["Client Browser"] -->|Port 8082 / HTTP| App["Spring Boot Service\n(/opt/.../app.jar)"]
-    App -->|Port 3306 / JDBC| DB["MySQL Server\n(medicare_patient_db)"]
+    Client["Client Browser"] -->|Port 8082 HTTP| App["Spring Boot Service - Port 8082"]
+    App -->|Port 3306 JDBC| DB["MySQL Server - medicare_patient_db"]
 ```
 
 ---
@@ -392,10 +392,10 @@ Khi đi thi, một đề thi thường có nhiều câu (Câu 1: Web tĩnh cổn
 
 ```mermaid
 flowchart TD
-    Client["Trình duyệt Người dùng (Port 80)"] --> Nginx["NGINX GATEWAY (Port 80)"]
-    Nginx -->|Truy cập / (File tĩnh HTML)| WebRoot["/var/www/frontend/index.html\n(Giao diện người dùng)"]
-    Nginx -->|Gọi /api/... (Chuyển tiếp Reverse Proxy)| SpringBoot["Spring Boot Service (Port 8082)\n(/opt/.../app.jar)"]
-    SpringBoot -->|Kết nối JDBC Port 3306| MySQL[("MySQL Database Server\n(medicare_patient_db)")]
+    Client["Trinh duyet Nguoi dung - Port 80"] --> Nginx["NGINX GATEWAY - Port 80"]
+    Nginx -->|Truy cap Trang chu| WebRoot["Giao dien HTML: /var/www/frontend/index.html"]
+    Nginx -->|Chuyen tiep goi API /api/| SpringBoot["Backend Spring Boot - Port 8082"]
+    SpringBoot -->|Ket noi JDBC Port 3306| MySQL["MySQL Database: medicare_patient_db"]
 ```
 
 > **Lợi ích vàng của mô hình này:**
