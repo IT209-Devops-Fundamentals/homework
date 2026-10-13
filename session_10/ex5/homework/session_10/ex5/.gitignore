@@ -1,0 +1,6 @@
+# Bỏ qua tệp chứa thông tin nhạy cảm và credentials
+.env
+
+# Bỏ qua dependencies và log
+node_modules/
+npm-debug.log
